@@ -1,0 +1,118 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var app = require('../app');
+var debug = require('debug')('emphrisbackend:server');
+var https = require('https');
+var fs = require('fs');
+var mq = require('../mqtt');
+
+const server1 = https.createServer({
+  key: fs.readFileSync('/var/www/apps.olmatix.com/web/EmphrisBackend/ssl/key.pem'),
+  cert: fs.readFileSync('/var/www/apps.olmatix.com/web/EmphrisBackend/ssl/cert.pem'),
+  ca: fs.readFileSync('/var/www/apps.olmatix.com/web/EmphrisBackend/ssl/ca_bundle.crt')
+}, app);
+
+var io = require('socket.io').listen(server1);
+var feed;
+
+
+//mqtt
+
+
+// On connection to the socket, just invoking the function.
+io.on('connection', function (socket) {
+  console.log("a client connected")
+  feed = require('../models/usersfeed')(socket);
+});
+
+/**
+ * Get port from environment and store in Express.
+ */
+var port = normalizePort(process.env.PORT || '3000');
+var port1 = normalizePort(process.env.PORT1 || '7000');
+
+app.set('port', port);
+app.set('port1', port1);
+
+/**
+ * Create HTTP server.
+ */
+const server = https.createServer({
+  key: fs.readFileSync('/var/www/apps.olmatix.com/web/EmphrisBackend/ssl/key.pem'),
+  cert: fs.readFileSync('/var/www/apps.olmatix.com/web/EmphrisBackend/ssl/cert.pem'),
+  ca: fs.readFileSync('/var/www/apps.olmatix.com/web/EmphrisBackend/ssl/ca_bundle.crt')
+}, app);
+
+server1.listen(port1, function () {
+  console.log('Socket listening on port ' + port1);
+});
+
+server.listen(port, function () {
+  console.log('API listening on port ' + port);
+});
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+/**
+ * Event listener for HTTP server "error" event.
+ */
+
+function onError(error) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  var bind = typeof port === 'string' ?
+    'Pipe ' + port :
+    'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      console.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      console.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+/**
+ * Event listener for HTTP server "listening" event.
+ */
+
+function onListening() {
+  var addr = server.address();
+  var bind = typeof addr === 'string' ?
+    'pipe ' + addr :
+    'port ' + addr.port;
+  debug('Listening on ' + bind);
+}
