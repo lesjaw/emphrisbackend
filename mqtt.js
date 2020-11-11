@@ -135,9 +135,9 @@ client.on('message', function (topic, message) {
                         "body": "Warning Button Panic Box is " + data[2],
                         "icon": "https://apps.olmatix.com:3000/assets/panic.png",
                         "image": "https://apps.olmatix.com:3000/assets/panic.png",
-                        "sound": "ambulance.mp3",
-                        "channelId": 'panicbutton',
-                        "android_channel_id": "panicbutton"
+                        "sound": "default",
+                        "channelId": 'device',
+                        "android_channel_id": "device"
                     },
                     "data": {
                         "for": "admin"
